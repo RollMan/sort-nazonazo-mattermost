@@ -1,6 +1,7 @@
 package main
 
 import (
+  "time"
   "sort"
   "sync"
   "fmt"
@@ -40,6 +41,7 @@ func SortString(s string) string{
 
 func GenerateNewProblem()string{
   idx := rand.Intn(len(words))
+  fmt.Println(words[idx])
   return words[idx]
 }
 
@@ -99,6 +101,7 @@ func MattermostHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func main(){
+  rand.Seed(time.Now().UnixNano())
   problem_ongoing = false
   r := mux.NewRouter()
   r.HandleFunc("/sort-nazonazo", MattermostHandler)
