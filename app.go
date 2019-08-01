@@ -116,6 +116,8 @@ func main(){
   log.Fatal(http.ListenAndServe(":8080", r))
 }
 
+// Word list is from https://www.ef.com/wwen/english-resources/english-vocabulary/top-1000-words/
+
 var words = []string{
 "a",
 "ability",
