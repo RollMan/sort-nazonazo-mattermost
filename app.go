@@ -1,6 +1,7 @@
 package main
 
 import (
+  "time"
   "sort"
   "sync"
   "fmt"
@@ -16,6 +17,7 @@ var (
   problem_ongoing bool
   problem_ongoingMu sync.Mutex
   problem string
+  hint_num int
 )
 
 type sortRunes []rune
@@ -40,6 +42,7 @@ func SortString(s string) string{
 
 func GenerateNewProblem()string{
   idx := rand.Intn(len(words))
+  fmt.Println(words[idx])
   return words[idx]
 }
 
@@ -71,9 +74,10 @@ func MattermostHandler(w http.ResponseWriter, r *http.Request){
     return
   }
 
-  if post.Text == "newproblem" {
+  if post.Text == "!newproblem" || post.Text == "!np" {
     if problem_ongoing == false {
       problem_ongoing = true
+      hint_num = 0
       // new problem
       problem = GenerateNewProblem()
       problem_sorted := SortString(problem)
@@ -88,7 +92,13 @@ func MattermostHandler(w http.ResponseWriter, r *http.Request){
       return
     }
   }else if problem_ongoing == true{
-    if post.Text == problem {
+    if post.Text == "!hint" {
+      hint_num = hint_num + 1
+      w.Header().Add("token", post.Token)
+      w.Header().Add("Content-Type", "application/json")
+      fmt.Fprintf(w, `{"text":"Hint: The answer begins with %s"}`, string([]rune(problem)[:hint_num]))
+      return
+    } else if post.Text == problem {
       w.Header().Add("token", post.Token)
       w.Header().Add("Content-Type", "application/json")
       fmt.Fprintf(w, `{"text":"Correct %s!"}`, post.User_name)
@@ -99,6 +109,7 @@ func MattermostHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func main(){
+  rand.Seed(time.Now().UnixNano())
   problem_ongoing = false
   r := mux.NewRouter()
   r.HandleFunc("/sort-nazonazo", MattermostHandler)
